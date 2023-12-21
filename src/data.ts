@@ -1,6 +1,6 @@
 import { PhotoGallery } from "./types/global.types";
 
-export const initialImageData: PhotoGallery[] = [
+export const PhotoData: PhotoGallery[] = [
   {
     id: "1",
     slug: "/assets/images/image-1.jpg",

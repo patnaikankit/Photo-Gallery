@@ -3,3 +3,6 @@
 @import 'tailwindcss/utilities';
 
 /* Your custom styles go here */
+body {
+    background-color: rgb(232, 237, 238);
+  }

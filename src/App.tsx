@@ -1,10 +1,114 @@
 import './App.css'
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+  TouchSensor,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useState } from 'react';
+import { PhotoGallery } from './types/global.types';
+import { PhotoData } from './data';
+
 
 function App() {
+  // States
+  const [activeCard, setActiveCard] = useState<PhotoGallery | null>(null);
+  const [galleryData, setGalleryData] = useState(PhotoData)
+
+
+  // Sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+    useSensor(TouchSensor)
+  );
+
+
+  // Functions
+  const handleDragStart = (event: DragStartEvent) => {
+    const { id } = event.active; 
+    if (!id) {
+        return;
+    }
+    const currentImage =  PhotoData.find((item) => {
+      item.id === id
+    });
+
+    setActiveCard(currentImage || null);
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveCard(null);
+
+    if (event.active && event.over) {
+        const { active, over } = event;
+        
+        if (active.id !== over.id) {
+            setGalleryData((items) => {
+                const oldIndex = items.findIndex((item) => {
+                  item.id === active.id
+                });
+                const newIndex = items.findIndex((item) => {
+                  item.id === over.id
+                });
+
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
+    }
+};
+
 
   return (
     <>
-      <h1 className='m-8 font-bold text-3xl text-blue-300'>Hello World!</h1>
+      <div className='min-h-screen'>
+        <div className='container flex flex-col items-center'>
+          <div className='bg-white my-8 rounded-lg shadow max-w-5xl grid divide-y'>
+            <header>
+              <h1>Gallery</h1>
+            </header>
+
+            <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            >
+              <div className='grid grid-cols-2 md:grid-cols-5 gap-8 p-8'>
+                <SortableContext 
+                items={galleryData}
+                strategy={rectSortingStrategy}>
+                  {galleryData.map((imageItem) => {
+                  return (
+                    <ImageCard
+                      key={imageItem.id}
+                      id={imageItem.id}
+                      isSelected={imageItem.isSelected}
+                      slug={imageItem.slug}
+                      onClick={handleSelectImage}
+                    />
+                  );
+                })}
+                </SortableContext>
+              </div>
+            </DndContext>
+          </div>
+        </div>
+      </div>
     </>
   )
 }
