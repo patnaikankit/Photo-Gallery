@@ -20,6 +20,8 @@ import {
 import { useState } from 'react';
 import { PhotoGallery } from './types/global.types';
 import { PhotoData } from './data';
+import Card from './components/Card/Card';
+import AddPhotoCard from './components/Card/addPhotoCard';
 
 
 function App() {
@@ -72,6 +74,21 @@ function App() {
     }
 };
 
+  const handleSelect = (id: string | number) => {
+    const newGalleryData = galleryData.map((imageItem) => {
+      if (imageItem.id === id) {
+        return {
+          ...imageItem,
+          isSelected: !imageItem.isSelected,
+        };
+      }
+
+      return imageItem;
+    });
+
+    setGalleryData(newGalleryData);
+  }
+
 
   return (
     <>
@@ -94,16 +111,18 @@ function App() {
                 strategy={rectSortingStrategy}>
                   {galleryData.map((imageItem) => {
                   return (
-                    <ImageCard
+                    <Card
                       key={imageItem.id}
                       id={imageItem.id}
                       isSelected={imageItem.isSelected}
                       slug={imageItem.slug}
-                      onClick={handleSelectImage}
+                      onClick={handleSelect}
                     />
                   );
                 })}
                 </SortableContext>
+
+                <AddPhotoCard setGalleryData={setGalleryData}/>
               </div>
             </DndContext>
           </div>
