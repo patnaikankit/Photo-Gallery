@@ -1,27 +1,24 @@
-import { PhotoGallery } from "../../types/global.types";
 import { twMerge } from "tailwind-merge";
-import Modal from "../Modal/Modal";
-import { nanoid } from "nanoid";
 import ImageIcon from "../Icons/ImageIcon";
-import CloseIcon from "../Icons/CloseIcon";
+import Modal from "../Modal/Modal";
 import { useState } from "react";
+import CloseIcon from "../Icons/CloseIcon";
+import { IImageGallery } from "../../types/global.types";
+import { nanoid } from "nanoid";
 
-interface AddPhotoCard {
-    setGalleryData: React.Dispatch<React.SetStateAction<PhotoGallery[]>>;
+interface IAddImageCard {
+  setGalleryData: React.Dispatch<React.SetStateAction<IImageGallery[]>>;
 }
 
-const AddPhotoCard = ({ setGalleryData }: AddPhotoCard) => {
+const AddImageCard = ({ setGalleryData }: IAddImageCard) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
 
   const handleImageSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // get image url from input
     const imageUrl = event.currentTarget["image-url"].value;
 
-    if (!imageUrl){
-      return ;
-    } 
+    if (!imageUrl) return;
 
     setGalleryData((prev) => [
       ...prev,
@@ -37,7 +34,7 @@ const AddPhotoCard = ({ setGalleryData }: AddPhotoCard) => {
 
   return (
     <>
-        <button
+      <button
         type="button"
         onClick={() => setIsModalOpen(true)}
         className={twMerge(
@@ -49,15 +46,16 @@ const AddPhotoCard = ({ setGalleryData }: AddPhotoCard) => {
           Add Photos
         </p>
       </button>
-
       <Modal
         open={isModalOpen}
         handleClose={() => setIsModalOpen(false)}
         modalId="addImageModal"
       >
-        <form className="relative py-12 px-6 bg-neutral-50 rounded w-[680px] max-w-[95vw] max-h-[95vh]"
-          onSubmit={handleImageSubmit}>
-        <CloseIcon
+        <form
+          className="relative py-12 px-6 bg-neutral-50 rounded w-[680px] max-w-[95vw] max-h-[95vh]"
+          onSubmit={handleImageSubmit}
+        >
+          <CloseIcon
             onClick={() => setIsModalOpen(false)}
             width={31}
             className="absolute top-4 right-4 cursor-pointer text-red-600 hover:text-red-700 transition-all"
@@ -76,13 +74,13 @@ const AddPhotoCard = ({ setGalleryData }: AddPhotoCard) => {
               type="submit"
               className="px-8 py-2.5 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors duration-500"
             >
-              Add Image
+              Add Photo
             </button>
           </div>
         </form>
       </Modal>
     </>
-  )
-}
+  );
+};
 
-export default AddPhotoCard
+export default AddImageCard;

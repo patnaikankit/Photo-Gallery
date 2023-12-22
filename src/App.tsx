@@ -1,4 +1,9 @@
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import HeaderBlock from "./components/Header/_HeaderBlock";
+import { initialImageData } from "./data";
+import ImageCard from "./components/Card/ImageCard";
+import { IImageGallery } from "./types/global.types";
 import {
   DndContext,
   KeyboardSensor,
@@ -17,66 +22,14 @@ import {
   sortableKeyboardCoordinates,
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useState } from 'react';
-import { PhotoGallery } from './types/global.types';
-import { PhotoData } from './data';
-import Card from './components/Card/Card';
-import AddPhotoCard from './components/Card/addPhotoCard';
-import ImageOverlayCard from './components/Card/overlayCard';
-import HeaderBlock from "./components/Header/_HeaderBlock";
-
+import ImageOverlayCard from "./components/Card/ImageOverlayCard";
+import AddImageCard from "./components/Card/addPhotoCard";
 
 function App() {
-  // States
-  const [activeCard, setActiveCard] = useState<PhotoGallery | null>(null);
-  const [galleryData, setGalleryData] = useState(PhotoData)
+  const [galleryData, setGalleryData] = useState(initialImageData);
 
-
-  // Sensors
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-    useSensor(TouchSensor)
-  );
-
-
-  // Functions
-  const handleDragStart = (event: DragStartEvent) => {
-    const { id } = event.active; 
-    if (!id) {
-        return;
-    }
-    const currentImage =  PhotoData.find((item) => {
-      item.id === id
-    });
-
-    setActiveCard(currentImage || null);
-  }
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    setActiveCard(null);
-
-    if (event.active && event.over) {
-        const { active, over } = event;
-        
-        if (active.id !== over.id) {
-            setGalleryData((items) => {
-                const oldIndex = items.findIndex((item) => {
-                  item.id === active.id
-                });
-                const newIndex = items.findIndex((item) => {
-                  item.id === over.id
-                });
-
-                return arrayMove(items, oldIndex, newIndex);
-            });
-        }
-    }
-};
-
-  const handleSelect = (id: string | number) => {
+  const handleSelectImage = (id: string | number) => {
+    // if galleryData.isSelected === true then set to false and vice versa
     const newGalleryData = galleryData.map((imageItem) => {
       if (imageItem.id === id) {
         return {
@@ -89,9 +42,9 @@ function App() {
     });
 
     setGalleryData(newGalleryData);
-  }
+  };
 
-  const handleOnDelete = (selectedItems: PhotoGallery[]) => {
+  const handleOnDelete = (selectedItems: IImageGallery[]) => {
     // if galleryData.isSelected === true then filter out the selected items and return the rest
     const newGalleryData = galleryData.filter(
       (imageItem) => !selectedItems.includes(imageItem)
@@ -100,54 +53,92 @@ function App() {
     setGalleryData(newGalleryData);
   };
 
+  // DND CODE STARTS HERE
+  const [activeItem, setActiveItem] = useState<IImageGallery | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+    useSensor(TouchSensor)
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const { id } = event.active;
+
+    if (!id){
+      return;
+    } 
+
+    const currentItem = galleryData.find((item) => item.id === id);
+
+    setActiveItem(currentItem || null);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveItem(null);
+    const { active, over } = event;
+
+    if (!over) {
+      return;
+    }
+
+    if (active.id !== over.id) {
+      setGalleryData((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+  // DND CODE ENDS HERE
 
   return (
-    <>
-      <div className='min-h-screen'>
-        <div className='container flex flex-col items-center'>
-          <div className='bg-white my-8 rounded-lg shadow max-w-5xl grid divide-y'>
-            <HeaderBlock onDelete={handleOnDelete} galleryData={galleryData} />
-
-            <DndContext
+    <div className="min-h-screen">
+      <div className="container flex flex-col items-center">
+        <div className="bg-white my-8 rounded-lg shadow max-w-5xl grid divide-y">
+          <HeaderBlock onDelete={handleOnDelete} galleryData={galleryData} />
+          <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
-            >
-              <div className='grid grid-cols-2 md:grid-cols-5 gap-8 p-8'>
-                <SortableContext 
+          >
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-8 p-8">
+              <SortableContext
                 items={galleryData}
-                strategy={rectSortingStrategy}>
-                  {galleryData.map((imageItem) => {
+                strategy={rectSortingStrategy}
+              >
+                {galleryData.map((imageItem) => {
                   return (
-                    <Card
+                    <ImageCard
                       key={imageItem.id}
                       id={imageItem.id}
                       isSelected={imageItem.isSelected}
                       slug={imageItem.slug}
-                      onClick={handleSelect}
+                      onClick={handleSelectImage}
                     />
                   );
                 })}
-                </SortableContext>
+              </SortableContext>
+              <AddImageCard setGalleryData={setGalleryData} />
 
-                <AddPhotoCard setGalleryData={setGalleryData}/>
-
-                <DragOverlay adjustScale={true} wrapperElement="div">
-                {activeCard ? (
+              <DragOverlay adjustScale={true} wrapperElement="div">
+                {activeItem ? (
                   <ImageOverlayCard
                     className="absolute z-50 h-full w-full"
-                    slug={activeCard.slug}
+                    slug={activeItem.slug}
                   />
                 ) : null}
               </DragOverlay>
-              </div>
-            </DndContext>
-          </div>
+            </div>
+          </DndContext>
         </div>
       </div>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;

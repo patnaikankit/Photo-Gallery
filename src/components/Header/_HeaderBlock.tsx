@@ -1,10 +1,10 @@
-import { PhotoGallery } from "../../types/global.types";
+import { IImageGallery } from "../../types/global.types";
 import CheckboxIcon from "../Icons/CheckboxIcon";
 import EmptyCheckboxIcon from "../Icons/EmptyCheckboxIcon";
 
 interface IHeaderProps {
-  onDelete: (selectedItems: PhotoGallery[]) => void;
-  galleryData: PhotoGallery[];
+  onDelete: (selectedItems: IImageGallery[]) => void;
+  galleryData: IImageGallery[];
 }
 
 const HeaderBlock = ({ onDelete, galleryData }: IHeaderProps) => {
@@ -39,7 +39,7 @@ const HeaderBlock = ({ onDelete, galleryData }: IHeaderProps) => {
           </button>
         </>
       ) : (
-        <p className="text-2xl font-semibold text-gray-800">Showcase</p>
+        <p className="text-2xl font-semibold text-gray-800">Gallery</p>
       )}
     </div>
   );
