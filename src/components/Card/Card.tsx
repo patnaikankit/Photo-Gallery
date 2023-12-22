@@ -2,6 +2,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { PhotoGallery } from "../../types/global.types";
 import { twMerge } from "tailwind-merge";
 import { CSS } from "@dnd-kit/utilities";
+import CheckboxIcon from "../Icons/CheckboxIcon";
+import EmptyCheckboxIcon from "../Icons/EmptyCheckboxIcon";
 
 interface Card extends PhotoGallery{
     className?: string,
@@ -9,7 +11,7 @@ interface Card extends PhotoGallery{
 }
 
 
-const Card = ({id, slug, isSelected, onClick, className="", }: PhotoGallery) => {
+const imageCard = ({id, slug, isSelected, className="", onClick}: Card) => {
     const {
         attributes,
         listeners,
@@ -65,4 +67,4 @@ const Card = ({id, slug, isSelected, onClick, className="", }: PhotoGallery) => 
   )
 }
 
-export default Card
+export default imageCard

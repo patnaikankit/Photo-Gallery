@@ -22,6 +22,8 @@ import { PhotoGallery } from './types/global.types';
 import { PhotoData } from './data';
 import Card from './components/Card/Card';
 import AddPhotoCard from './components/Card/addPhotoCard';
+import ImageOverlayCard from './components/Card/overlayCard';
+import HeaderBlock from "./components/Header/_HeaderBlock";
 
 
 function App() {
@@ -89,15 +91,22 @@ function App() {
     setGalleryData(newGalleryData);
   }
 
+  const handleOnDelete = (selectedItems: PhotoGallery[]) => {
+    // if galleryData.isSelected === true then filter out the selected items and return the rest
+    const newGalleryData = galleryData.filter(
+      (imageItem) => !selectedItems.includes(imageItem)
+    );
+
+    setGalleryData(newGalleryData);
+  };
+
 
   return (
     <>
       <div className='min-h-screen'>
         <div className='container flex flex-col items-center'>
           <div className='bg-white my-8 rounded-lg shadow max-w-5xl grid divide-y'>
-            <header>
-              <h1>Gallery</h1>
-            </header>
+            <HeaderBlock onDelete={handleOnDelete} galleryData={galleryData} />
 
             <DndContext
             sensors={sensors}
@@ -123,6 +132,15 @@ function App() {
                 </SortableContext>
 
                 <AddPhotoCard setGalleryData={setGalleryData}/>
+
+                <DragOverlay adjustScale={true} wrapperElement="div">
+                {activeCard ? (
+                  <ImageOverlayCard
+                    className="absolute z-50 h-full w-full"
+                    slug={activeCard.slug}
+                  />
+                ) : null}
+              </DragOverlay>
               </div>
             </DndContext>
           </div>
